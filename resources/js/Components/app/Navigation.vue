@@ -1,17 +1,18 @@
 <template>
     <nav class="min-w-[200px]">
-        <div class="h-[80px] px-3 flex items-center gap-3">
-                <Link href="/">
+       
+                <Link class="h-[80px] px-3 flex items-center gap-3" :href="route('myFiles')">
                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800"
                                     />
+                                     LaravelStorage
                 </Link>
-                LaravelStorage
-        </div>
+               
+        
         <div class="px-3">
             <CreateNewDropdown />
             <div class="py-3">
-                <NavLink href="/">My Files</NavLink>
+                <NavLink :href="route('myFiles')" :active="route().current('myFiles')" >My Files</NavLink>
                 <NavLink href="/" >Share wth Me</NavLink>
                 <NavLink href="/">Share by me</NavLink>
                 <NavLink href="/">Trash</NavLink>
