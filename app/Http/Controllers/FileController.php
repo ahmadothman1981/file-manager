@@ -26,6 +26,7 @@ class FileController extends Controller
         $file->is_folder = 1;
         $file->name = $data['name'];
         $parent->appendNode($file);
+       
     }
 
     private function getRoot()

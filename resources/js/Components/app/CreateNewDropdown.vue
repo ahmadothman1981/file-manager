@@ -22,10 +22,10 @@
 class="flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"            >
                  <div class="px-1 py-1">
                     <MenuItem v-slot="{ active }">
-                      <a  :class="[
-                active ? 'bg-gray-100' : '',
-                'block rounded-md px-4 py-2 text-sm text-gray-700',
-              ]"> New Folder</a>
+                      <a href="#" @click.prevent="showCreateFolderModal" :class="[
+                                 active ? 'bg-gray-100' : '','block rounded-md px-4 py-2 text-sm text-gray-700',]">
+                            New Folder
+                     </a>
                     </MenuItem>
                  </div>
                 <div class="px-1 py-1">
@@ -33,7 +33,7 @@ class="flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-s
                         <a  :class="[
                 active ? 'bg-gray-100' : '',
                 'block rounded-md px-4 py-2 text-sm text-gray-700',
-              ]">Upoaad File</a>
+              ]">Upload File</a>
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                         <a  :class="[
@@ -45,9 +45,21 @@ class="flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-s
             </MenuItems>
         </transition>
     </Menu>
+    <CreateFolderModal v-model="createFolderModal" />
 </template>
 <script setup>
-   import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+   import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+   import CreateFolderModal from "@/Components/app/CreateFolderModal.vue";
+   import { ref } from 'vue';
+
+//refs
+const createFolderModal = ref(false);
+
+//Methods
+
+function showCreateFolderModal(){
+    createFolderModal.value = true
+}
 
 
 </script>
