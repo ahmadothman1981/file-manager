@@ -40,43 +40,33 @@ class FileController extends Controller
      * Display a listing of the resource.
      * This method handles the /my-files route.
      */
-    public function myFiles(Request $request) // Or your specific FormRequest if applicable
-    {
-        $user = Auth::user();
-        $currentFolder = null;
+    public function myFiles(Request $request, string $folder = null)
+{
+    $user = Auth::user();
 
-        $requestedParentId = $request->input('parent_id');
-
-        if ($requestedParentId) {
-            // If a specific folder is requested, try to load it.
-            // Ensure it belongs to the user and is a folder.
-            $currentFolder = File::query()
-                ->where('id', $requestedParentId)
-                ->where('created_by', $user->id)
-                ->where('is_folder', 1)
-                ->firstOrFail(); // This will throw a 404 if the folder is not found or not accessible.
-        } else {
-            // No specific folder requested, so display the root folder.
-            // This will get the existing root or create one if it's missing.
-            $currentFolder = $this->getOrCreateUserRootFolder();
-        }
-
-        // Fetch files and subfolders within the currentFolder
-        $files = File::query()
-            ->where('parent_id', $currentFolder->id)
+    // Determine current folder
+    $currentFolder = $folder
+        ? File::where('path', $folder)
             ->where('created_by', $user->id)
-            ->orderBy('is_folder', 'desc') // Show folders first
-            ->orderBy('name', 'asc')
-            ->paginate(config('app.files_per_page', 15)); // Use a config value for items per page
-            $files = FileResource::collection($files);
-        return Inertia::render('MyFiles', [
-            'files' => $files,
-            // Optionally, you can pass the current folder and its ancestors for breadcrumbs
-            // 'currentFolder' => new FileResource($currentFolder),
-            // 'ancestors' => FileResource::collection($currentFolder->ancestors()->orderBy('path', 'asc')->get()),
-        ]);
-    }
+            ->where('is_folder', true)
+            ->firstOrFail()
+        : $this->getOrCreateUserRootFolder();
 
+    // Fetch children files/folders
+    $files = File::query()
+        ->where('parent_id', $currentFolder->id)
+        ->where('created_by', $user->id)
+        ->orderBy('is_folder', 'desc')
+        ->orderBy('name', 'asc')
+        ->paginate(config('app.files_per_page', 15))
+        ->withQueryString();
+
+    return Inertia::render('MyFiles', [
+        'files' => FileResource::collection($files),
+        'currentFolder' => new FileResource($currentFolder),
+        'breadcrumbs' => FileResource::collection($currentFolder->ancestors()->orderBy('path')->get()),
+    ]);
+}
     // Other methods like storeFolder, download, delete, etc.
 
 
