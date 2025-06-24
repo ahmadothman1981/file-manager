@@ -13,8 +13,8 @@
             <CreateNewDropdown />
             <div class="py-3">
                 <NavLink :href="route('myFiles')" :active="route().current('myFiles')" >My Files</NavLink>
-                <NavLink href="/" >Share wth Me</NavLink>
-                <NavLink href="/">Share by me</NavLink>
+                <NavLink href="/" >Upload Files</NavLink>
+                <NavLink href="/">Upload Folders</NavLink>
                 <NavLink href="/">Trash</NavLink>
             </div>
         </div>
