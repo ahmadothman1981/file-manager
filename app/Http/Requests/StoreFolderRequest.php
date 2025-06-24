@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\File;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\ParentIdBaseRequest;
 
 class StoreFolderRequest extends ParentIdBaseRequest
 {
@@ -20,9 +21,10 @@ class StoreFolderRequest extends ParentIdBaseRequest
         return array_merge(
             parent::rules(),
             [
-                'name' => ['required',
-                Rule::nique(File::class,'name')
-                ->where('created_at' , Auth::id())
+                'name' => [
+                    'required',
+                Rule::unique(File::class,'name')
+                ->where('created_by' , Auth::id())
                 ->where('parent_id',$this->parent_id)
                 ->whereNull('deleted_at')
                 ]
