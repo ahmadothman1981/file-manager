@@ -34,14 +34,16 @@ import TextInput from '@/components/TextInput.vue'
 import InputError from '@/components/InputError.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import SecondaryButton from '@/components/SecondaryButton.vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm , usePage } from '@inertiajs/vue3'
 import {nextTick, ref} from 'vue'
 
 
 
 const form = useForm({
-    name: ''
+    name: '',
+    parent_id : null,
 })
+const page = usePage();
 
 //refs
 
@@ -61,6 +63,7 @@ function onShow(){
     })
 }
 function createFolder(){
+    form.parent_id = page.props.folder.id
     form.post(route('folder.create'),{
         preserveScroll:true,
         onSuccess:()=>{
