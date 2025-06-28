@@ -50,12 +50,62 @@ class FileController extends Controller
     public function store(StoreFileRequest $request)
     {
          $data = $request->validated();
-         dd($data);
+         $parent = $request->parent;
+         $user = $request->user();
+         $fileTree = $request->file_tree;
+         if($parent)
+         {
+            $parent = $this->getRoot();
+         }
+         if(!empty($fileTree))
+         {
+            $this->saveFileTree($fileTree, $parent , $user);
+         }else{
+            foreach($data['files'] as $file)
+            {
+                /**
+                 * @var \Illuminate\Http\UploadedFile $file
+                 */
+                $path = $file->store('/files/'.$user->id);
+                $model = new File();
+                $model->storage_path = $path;
+                $model->is_folder = false;
+                $model->name = $file->getClientOriginalName();
+                $model->mime = $file->getMimeType();
+                $model->size = $file->getSize();
+                $parent->appendNode($model);
+            
+            }
+         }
+         
     }
 
 
     private function getRoot()
     {
         return File::query()->whereIsRoot()->where('created_by',Auth::id())->firstOrFail();
+    }
+    public function saveFileTree($fileTree , $parent , $user)
+    {
+        foreach($fileTree as $name => $file)
+        {
+            if(is_array($file))
+            {
+                $folder = new File();
+                $folder->is_folder = 1;
+                $folder->name = $name;
+                $parent->appendNode($folder);
+                $this->saveFileTree($file , $folder , $user);
+            }else{
+                 $path = $file->store('/files/'.$user->id);
+                $model = new File();
+                $model->storage_path = $path;
+                $model->is_folder = false;
+                $model->name = $file->getClientOriginalName();
+                $model->mime = $file->getMimeType();
+                $model->size = $file->getSize();
+                $parent->appendNode($model);
+            }
+        }
     }
 }

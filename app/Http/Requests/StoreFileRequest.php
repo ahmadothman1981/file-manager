@@ -17,6 +17,13 @@ class StoreFileRequest extends ParentIdBaseRequest
         'folder_name' => $this->detectFolderName($path),
       ]);
    }
+   protected function passedValidation()
+   {
+    $data = $this->validated();
+    $this->replace([
+        'file_tree'=> $this->buildFileTree($this->file_paths , $data['files'])
+    ]);
+   }
 
     /**
      * Get the validation rules that apply to the request.
@@ -73,7 +80,34 @@ class StoreFileRequest extends ParentIdBaseRequest
         if(!$path){
             return null;
         }
-       $part=  explode('/', $path[0]);
-        return $part[0];
+       $parts=  explode('/', $path[0]);
+        return $parts[0];
+    }
+    private function buildFileTree($filePaths,$files) 
+    {
+        $filePaths = array_slice($filePaths , 0 , count($files));
+         $filePaths =  array_filter( $filePaths , fn($f) =>$f != null );
+         $tree = [];
+         foreach($filePaths as $index => $filePath)
+         {
+            $parts = explode('/', $filePath);
+            $currentNode = &$tree;
+            foreach($parts as $key=>$part)
+            {
+                if(!isset($currentNode[$part]))
+                {
+                    $currentNode[$part] = [];
+                }
+                if($key ==count($parts)-1)
+                {
+                    $currentNode[$part] = $files[$index];
+
+                }else{
+                    $currentNode = &$currentNode[$part];
+                   
+                }
+            }
+         }
+         return $tree;
     }
 }
