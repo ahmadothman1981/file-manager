@@ -52,6 +52,7 @@
    <div v-if="!files.data.length" class="bg-white shadow-md rounded-md p-8 text-center">
       <p class="text-center text-gray-500">No files found</p>
       </div>
+      
 </AuthenticatedLayout>
 </template>
 <script setup>
