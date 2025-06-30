@@ -41,7 +41,7 @@
         </thead>
         <tbody>
         <tr v-for="file of files.data" :key="file.id" @dblclick="openFolder(file)">
-            <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.name}}</td>
+            <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 flex items-center"><FileIcon :file="file"/> {{file.name}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.owner}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.updated_at}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.size}}</td>
@@ -58,6 +58,7 @@
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 import {router , Link} from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'
+import FileIcon from '../Components/app/FileIcon.vue'
 //props
 const {files} = defineProps({
     files: Object,
