@@ -21,6 +21,7 @@
     </li>
   </ol>
 </nav>
+<div class="flex-1 overflow-auto">
   <table class="min-w-full  ">
    
     <thead class="bg-grey-100 border-b ">
@@ -40,7 +41,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="file of files.data" :key="file.id" @dblclick="openFolder(file)">
+        <tr v-for="file of allFiles.data" :key="file.id" @dblclick="openFolder(file)">
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 flex items-center"><FileIcon :file="file"/> {{file.name}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.owner}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.updated_at}}</td>
@@ -49,10 +50,12 @@
         </tr>
         </tbody>
   </table>
-   <div v-if="!files.data.length" class="bg-white shadow-md rounded-md p-8 text-center">
+  
+   <div v-if="!allFiles.data.length" class="bg-white shadow-md rounded-md p-8 text-center">
       <p class="text-center text-gray-500">No files found</p>
       </div>
-      
+      <div ref="loadMoreIntersect"></div>
+      </div>
 </AuthenticatedLayout>
 </template>
 <script setup>
@@ -60,12 +63,22 @@ import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 import {router , Link} from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'
 import FileIcon from '../Components/app/FileIcon.vue'
+import { httpGet } from '../Helper/http-helper'
+import { onMounted , onUpdated, ref } from 'vue';
+
 //props
-const {files} = defineProps({
+const props = defineProps({
     files: Object,
     folder:Object,
     ancestors:Object
 });
+//refs 
+const loadMoreIntersect = ref(null);
+const allFiles = ref({
+      data:props.files.data ,
+     next: props.files.links.next 
+    });
+   
 //methods 
 function openFolder(file){
   if(!file.is_folder){
@@ -73,5 +86,34 @@ function openFolder(file){
   }
   router.visit(route('myFiles',{folder:file.path}))
 }
+function loadMore(){
+  console.log("load more");
+   console.log(props.files.links.next);
+   if(allFiles.value.next == null){
+    return ;
+   }
+   httpGet(allFiles.value.next).then(res => {
+      allFiles.value.data = [...allFiles.value.data , ...res.data];
+      allFiles.value.next = res.links.next;
+   })
+
+
+}
+onUpdated(() => {
+  allFiles.value = {
+    data:props.files.data,
+    next:props.files.links.next
+  };
+})
+onMounted(() => {
+  //  allFiles.value = {
+  //   data:props.files.data,
+  //   next:props.files.links.next
+  // };
+  const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && loadMore()), { 
+    rootMargin:'-250px 0px 0px'
+   })
+   observer.observe(loadMoreIntersect.value)
+})
 </script>
 <style></style>

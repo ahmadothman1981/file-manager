@@ -3,9 +3,10 @@
       <Navigation />
       <main @drop.prevent="handleDrop"  @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
        class="flex flex-col flex-1 px-4 overflow-hidden"  :class="dragOver ? 'dropzone' : ''">
-       <template v-if="dragOver" class="text-gray-500 text-center py-8 text-sm">
-          Drop files here to upload
-
+       <template v-if="dragOver">
+          <div class="bg-white shadow-md rounded-md p-8 text-center">
+            <p class="text-center text-gray-500">Drop files here to upload</p>
+          </div>
        </template>
        <template v-else >
         <div class="flex items-center justify-between w-full">
