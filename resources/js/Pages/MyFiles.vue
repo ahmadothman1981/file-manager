@@ -1,7 +1,7 @@
 <template>
 <AuthenticatedLayout>
 <nav class="flex items-center justify-between p-1 mb-3">
-  
+ 
   <ol class="inline-flex items-center space-x-1 md:space-x-3">
     <li v-for="ancestor in ancestors.data" :key="ancestor.id" class="inline-flex items-center">
       <Link v-if="!ancestor.parent_id" :href="route('myFiles')" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
@@ -21,8 +21,13 @@
       </div>
     </li>
   </ol>
+  <div>
+    <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds"/>
+  </div>
 </nav>
+
 <div class="flex-1 overflow-auto">
+
   <table class="min-w-full  ">
   
     <thead class="bg-grey-100 border-b ">
@@ -48,7 +53,7 @@
         <tr v-for="file of allFiles.data" :key="file.id" @dblclick="openFolder(file)" @click="$event => toggleFileSelect(file)">
           <td   class="bg-white border-b transition duration-300 ease-in-out hover:bg-blue-100 w-[30px] max-w-[30px] pr-0"
           :class="(selected[file.id] || allSelected) ? 'bg-blue-50' : 'bg-white'">
-            <Checkbox v-model="selected[file.id]" :checked="selected[file.id] || allSelected "/>
+            <Checkbox @change="$event => onSelectCheckbox(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected "/>
             </td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 flex items-center"><FileIcon :file="file"/> {{file.name}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.owner}}</td>
@@ -68,12 +73,14 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
+import DeleteFilesButton from '../Components/app/DeleteFilesButton.vue';
 import Checkbox from '../Components/Checkbox.vue'
 import {router , Link} from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'
 import FileIcon from '../Components/app/FileIcon.vue'
 import { httpGet } from '../Helper/http-helper'
 import { onMounted , onUpdated, ref } from 'vue';
+import { computed } from 'vue';
 
 //props
 const props = defineProps({
@@ -89,7 +96,8 @@ const allFiles = ref({
       data:props.files.data ,
      next: props.files.links.next 
     });
-   
+  //computed 
+  const selectedIds = computed(() => Object.entries(selected.value).filter(entry => entry[1]).map(entry => entry[0]))
 //methods 
 function openFolder(file){
   if(!file.is_folder){
@@ -117,7 +125,24 @@ function onSelectAllChange()
 }
 function toggleFileSelect(file){
   selected.value[file.id] = !selected.value[file.id];
+  onSelectCheckbox(file);
 }
+function onSelectCheckbox(file){
+  if(!selected.value[file.id]){
+    allSelected.value = false;
+  }else{
+    let checked = true;
+    for(let file of allFiles.value.data){
+      if(!selected.value[file.id]){
+        checked = false;
+        break;
+      }
+    
+    }
+    allSelected.value = checked;
+  }
+}
+
 onUpdated(() => {
   allFiles.value = {
     data:props.files.data,
