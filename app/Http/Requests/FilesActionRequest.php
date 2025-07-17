@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ParentIdBaseRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DestroyFilesRequest extends ParentIdBaseRequest
+class FilesActionRequest extends ParentIdBaseRequest
 {
    
 

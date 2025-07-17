@@ -22,7 +22,7 @@
     </li>
   </ol>
   <div>
-    <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds"/>
+    <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @deleted="onDelete"/>
   </div>
 </nav>
 
@@ -142,7 +142,10 @@ function onSelectCheckbox(file){
     allSelected.value = checked;
   }
 }
-
+function onDelete(){
+  selected.value = {};
+  allSelected.value = false;
+}
 onUpdated(() => {
   allFiles.value = {
     data:props.files.data,
