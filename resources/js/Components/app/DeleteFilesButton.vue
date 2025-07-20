@@ -15,7 +15,7 @@
 import ConfirmationDialog from "../ConfirmationDialog.vue"
 import { ref } from 'vue';
 import { useForm, usePage} from "@inertiajs/vue3"
-import { showErrorDialog } from "@/event-bus";
+import { showErrorDialog, showSuccessNotification } from "@/event-bus";
 
 
 //uses
@@ -67,10 +67,10 @@ function onDeleteConfirm()
         onSuccess: () => {
             showDeleteDialog.value = false;
             emit('deleted');
-            //success notification later
+            showSuccessNotification('Files deleted successfully')
         }
-    });
-   // console.log("this is deleting message" , props.deleteIds);
+    })
+  
 
 }
 </script>
