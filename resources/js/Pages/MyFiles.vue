@@ -22,6 +22,7 @@
     </li>
   </ol>
   <div>
+    <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
     <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @deleted="onDelete"/>
   </div>
 </nav>
@@ -74,6 +75,7 @@
 <script setup>
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 import DeleteFilesButton from '../Components/app/DeleteFilesButton.vue';
+import DownloadFilesButton from '../Components/app/DownloadFilesButton.vue';
 import Checkbox from '../Components/Checkbox.vue'
 import {router , Link} from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'

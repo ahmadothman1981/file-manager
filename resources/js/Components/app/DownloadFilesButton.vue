@@ -1,75 +1,84 @@
 <template>
 <PrimaryButton @click="download" >
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+</svg>
 
         Download
 </PrimaryButton>
 
-<ConfirmationDialog :show="showDeleteDialog" message="Are you sure you want to delete all files?" @cancel="onDeleteCancel" @confirm="onDeleteConfirm">
-</ConfirmationDialog>
+
 </template>
 <script setup>
-import ConfirmationDialog from "@/components/ConfirmationDialog.vue"
-import { ref } from 'vue';
-import { useForm, usePage} from "@inertiajs/vue3"
-import { showErrorDialog } from "@/event-bus";
+import { usePage } from "@inertiajs/vue3"
 import PrimaryButton from "../PrimaryButton.vue";
+import { httpGet } from "@/Helper/http-helper";
+import { showErrorDialog } from "@/event-bus";
 
 
 //uses
 const page = usePage();
-const deleteFilesForm = useForm({
-    all: null ,
-    ids: [],
-    parent_id: null
-});
+
+// const form = useForm({
+//     all: null ,
+//     ids: [],
+//     parent_id: null
+// });
 //refs
-const showDeleteDialog = ref(false);
+
 //props
 const props = defineProps({
-    deleteAll: {
+    all: {
         type: Boolean,
         required:false,
         default: false
     },
-    deleteIds: {
+    ids: {
         type:Array,
         required:false
     }
 })
-const emit = defineEmits(['deleted'])
-//methods
-function onDeleteClick()
-{
-    if(!props.deleteAll && !props.deleteIds.length)
-    {
-        showErrorDialog('No files selected');
-        return 
-    }
-    showDeleteDialog.value = true;
-    //console.log("DELETE");
-}
-function onDeleteCancel()
-{
-    showDeleteDialog.value = false;
-}
-function onDeleteConfirm()
-{
-    deleteFilesForm.parent_id = page.props.folder?.id || null;
-    if(props.deleteAll){
-        deleteFilesForm.all = true;
-    }else{
-        deleteFilesForm.ids = props.deleteIds;
-    }
-    deleteFilesForm.delete(route('file.destroy'),{
-        onSuccess: () => {
-            showDeleteDialog.value = false;
-            emit('deleted');
-            //success notification later
-        }
-    });
-   // console.log("this is deleting message" , props.deleteIds);
 
+//methods
+function download()
+{
+   if(!props.all && props.ids.length === 0)
+   {
+    showErrorDialog('Please select at least one file to download.');
+    return;
+   }
+   const p = new URLSearchParams();
+   const parentId = page.props.folder?.id;
+   if (parentId) {
+       p.append('parent_id', parentId);
+   }
+    if (props.all) {
+        p.append('all' , 1);
+    } else {
+        for (let id of props.ids) {
+            p.append('ids[]', id);
+        }
+    }
+   //form.parent_id = page.props.folder.id ;
+   httpGet(route('file.download') + '?' + p.toString())
+        .then(res => {
+            if (!res.url) {
+                showErrorDialog(res.message || 'An error occurred while preparing the download.');
+                return;
+            }
+            const a = document.createElement('a');
+            a.download = res.fileName;
+            a.href = res.url;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }).catch(err => {
+            console.error(err);
+            showErrorDialog('An error occurred during the download request.');
+        });
 }
+
+
+
 </script>
 <style scoped></style>
-

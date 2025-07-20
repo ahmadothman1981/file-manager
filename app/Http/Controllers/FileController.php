@@ -175,9 +175,13 @@ class FileController extends Controller
                     $url = $this->createZip($file->children);
                     $fileName = $file->name .'.zip';
                 }else{
-                    $destination = 'public/'. pathinfo($file->storage_path, PATHINFO_DIRNAME);
-                    Storage::copy($file->storage_path, $destination);
-                    $url = asset(Storage::url($destination ));
+                    $publicFilename = pathinfo($file->storage_path, PATHINFO_BASENAME);
+
+                    // Copy from 'local' (private) disk to 'public' disk
+                    $fileContents = Storage::disk('local')->get($file->storage_path);
+                    Storage::disk('public')->put($publicFilename, $fileContents);
+
+                    $url = asset('storage/' . $publicFilename);
                     $fileName = $file->name;
                 }
 
@@ -195,30 +199,34 @@ class FileController extends Controller
     }
     public function createZip($files)
     {
-        $zipPath = 'zip/'. Str::random().'.zip';
-        $publicPath = "public/$zipPath";
-        if(!is_dir(dirname($publicPath)))
-        {
-            Storage::makeDirectory(dirname($publicPath));
+        $zipName = Str::random().'.zip';
+        $zipPath = 'zip/'.$zipName;
+
+        $zipFile = Storage::disk('public')->path($zipPath);
+
+        if (!is_dir(dirname($zipFile))) {
+            Storage::disk('public')->makeDirectory('zip');
         }
-            $zipFile = Storage::path($publicPath);
-            $zip = new \ZipArchive();
-            if($zip->open($zipFile , \ZipArchive::CREATE | \ZipArchive::OVERWRITE))
-            {
-                $this->addFileToZip($zip , $files);
-            }
-            $zip->close();
-            return asset(Storage::url($zipPath));
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            $this->addFileToZip($zip, $files);
+        }
+
+        $zip->close();
+
+        return asset('storage/' . $zipPath);
     }
     private function addFileToZip($zip , $files, $ancestors = '')
     {
         foreach($files as $file)
         {
-            if($files->is_folder)
+            if($file->is_folder)
             {
                 $this->addFileToZip($zip , $file->children, $ancestors . $file->name . '/');
             }else{
-                $zip->addFile(Storage::path($file->storage_path), $ancestors . $file->name);
+                $zip->addFile(Storage::disk('local')->path($file->storage_path), $ancestors . $file->name);
             }
         }
     }   

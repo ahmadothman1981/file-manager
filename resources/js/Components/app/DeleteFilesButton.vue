@@ -12,7 +12,7 @@
 </ConfirmationDialog>
 </template>
 <script setup>
-import ConfirmationDialog from "@/components/ConfirmationDialog.vue"
+import ConfirmationDialog from "../ConfirmationDialog.vue"
 import { ref } from 'vue';
 import { useForm, usePage} from "@inertiajs/vue3"
 import { showErrorDialog } from "@/event-bus";
