@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use Kalnoy\Nestedset\NodeTrait;
 use App\Traits\HasCreatorAndUpdater;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -68,5 +69,10 @@ class File extends Model
         //         Storage::delete($model->storage_path);
         //     }
         // });
+    }
+    public function moveToTrach()
+    {
+        $this->deleted_at = Carbon::now();
+        return $this->save();
     }
 }
