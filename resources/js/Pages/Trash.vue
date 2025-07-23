@@ -3,7 +3,7 @@
 <nav class="flex items-center justify-end p-1 mb-3">
  
   <div>
-   
+   <RestoreFilesButton  :all-selected = "allSelected" :selected-ids="selectedIds"/>
   </div>
 </nav>
 
@@ -48,6 +48,7 @@
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 import Checkbox from '../Components/Checkbox.vue'
 import FileIcon from '../Components/app/FileIcon.vue'
+import RestoreFilesButton from '@/Components/app/RestoreFilesButton.vue';
 import { httpGet } from '../Helper/http-helper'
 import { onMounted , onUpdated, ref } from 'vue';
 import { computed } from 'vue';

@@ -12,7 +12,7 @@
  <img class="max-w-full" v-else-if="isExcel(file)" :src="`/images/icons/excel.png`">
   <img class="max-w-full" v-else-if="isZip(file)" :src="`/images/icons/zip.png`">
  <img class="max-w-full" v-else-if="isText(file)" :src="`/images/icons/text-format.png`">
- <img class="max-w-full" v-else :src="`/images/icon/attach-file.png`">
+ <img class="max-w-full" v-else :src="`/images/icons/attach-file.png`">
 </template>
 </span>
 
