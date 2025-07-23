@@ -22,6 +22,7 @@ Route::controller(\App\Http\Controllers\FileController::class)->middleware(['aut
     Route::post('/file','store')->name('file.store');
     Route::delete('/file','destroy')->name('file.destroy');
     Route::post('/file/restore','restore')->name('file.restore');
+    Route::delete('/file/delete-for-ever','deleteForEver')->name('file.deleteForEver');
     Route::get('/file/download','download')->name('file.download');
 });
 Route::get('/dashboard', function () {

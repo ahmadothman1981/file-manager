@@ -75,4 +75,22 @@ class File extends Model
         $this->deleted_at = Carbon::now();
         return $this->save();
     }
+    public function deleteForEver()
+    {
+        $this->deleteFileFromStorage([$this]);
+        $this->forceDelete();
+    }
+    public function deleteFileFromStorage($files)
+    {
+        foreach($files as $file)
+        {
+            if($file->is_folder)
+            {
+                $this->deleteFileFromStorage($file->children);
+            }else{
+                Storage::delete($file->storage_path);
+            }
+        
+        }
+    }
 }
