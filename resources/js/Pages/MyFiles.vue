@@ -22,6 +22,7 @@
     </li>
   </ol>
   <div>
+    <StarFilesButton :all-selected="allSelected" :selected-ids="selectedIds" class="mr-5"/>
     <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
     <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @deleted="onDelete"/>
   </div>
@@ -35,6 +36,9 @@
         <tr >
            <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left w-[30px] max-w-[30px] pr-0">
                 <Checkbox @change="onSelectAllChange" v-model:checked="allSelected"/>
+            </th>
+             <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+                
             </th>
             <th class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
                 Name
@@ -56,6 +60,20 @@
           :class="(selected[file.id] || allSelected) ? 'bg-blue-50' : 'bg-white'">
             <Checkbox @change="$event => onSelectCheckbox(file)" v-model="selected[file.id]" :checked="selected[file.id] || allSelected "/>
             </td>
+            <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100  text-yellow-500">
+          <div @click.stop.prevent="addRemoveFavourite(file)">
+              <svg v-if="!file.is_favourite" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+       <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+              </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+       <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+
+            
+            
+            </td>
+
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 flex items-center"><FileIcon :file="file"/> {{file.name}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.owner}}</td>
             <td class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100 ">{{file.updated_at}}</td>
@@ -76,13 +94,16 @@
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 import DeleteFilesButton from '../Components/app/DeleteFilesButton.vue';
 import DownloadFilesButton from '../Components/app/DownloadFilesButton.vue';
+import StarFilesButton from '../Components/app/StarFilesButton.vue'; 
 import Checkbox from '../Components/Checkbox.vue'
-import {router , Link} from '@inertiajs/vue3'
+import {router , Link , useForm} from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'
 import FileIcon from '../Components/app/FileIcon.vue'
 import { httpGet } from '../Helper/http-helper'
 import { onMounted , onUpdated, ref } from 'vue';
 import { computed } from 'vue';
+import { showErrorDialog, showSuccessNotification } from '@/event-bus';
+
 
 //props
 const props = defineProps({
@@ -147,6 +168,19 @@ function onSelectCheckbox(file){
 function onDelete(){
   selected.value = {};
   allSelected.value = false;
+}
+
+function addRemoveFavourite(file)
+{
+  const form = useForm({
+    ids: [file.id],
+});
+ form.post(route('file.addToFavourites'),{
+        onSuccess: () => { 
+          
+            showSuccessNotification('Files added to favourites successfully')
+        }
+    })
 }
 onUpdated(() => {
   allFiles.value = {

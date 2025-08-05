@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Inertia\Inertia;
+use App\Models\StarredFile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreFileRequest;
@@ -29,10 +31,12 @@ class FileController extends Controller
          $folder = $this->getRoot();
        }
        $files =  File::query()
+              ->with('starred')  
               ->where('parent_id', $folder->id)
               ->where('created_by', Auth::id())
               ->orderBy('is_folder', 'desc')
               ->orderBy('created_at', 'desc')
+              ->orderBy('id','desc')
               ->paginate(5);
 
               $files = FileResource::collection($files);
@@ -287,5 +291,39 @@ class FileController extends Controller
           }
        }
        return to_route('trash');
+    }
+    public function addToFavourites(FilesActionRequest $request)
+    {
+          $data = $request->validated();
+        $parent = $request->parent;
+
+        $all = $data['all'] ?? false;
+        $ids = $data['ids'] ?? [];
+        if(!$all && empty($ids))
+        {
+            return [
+                'message' => 'No files selected'
+            ];
+        }
+        if($all)
+        {
+            $children = $parent->children;
+
+        }else{
+            $children = File::find($ids);
+        }
+        
+        $data = [];
+        foreach($children as $child)
+        {
+            $data[] = [
+                'file_id' => $child->id,
+                'user_id' => Auth::id(),
+                'created_at' => Carbon:: now(),
+                'updated_at' => Carbon:: now(),
+            ];
+        }
+        StarredFile::insert($data);
+        return redirect()->back();
     }
 }

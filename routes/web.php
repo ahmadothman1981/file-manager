@@ -23,6 +23,7 @@ Route::controller(\App\Http\Controllers\FileController::class)->middleware(['aut
     Route::delete('/file','destroy')->name('file.destroy');
     Route::post('/file/restore','restore')->name('file.restore');
     Route::delete('/file/delete-for-ever','deleteForEver')->name('file.deleteForEver');
+    Route::post('/file/add-to-favourites','addToFavourites')->name('file.addToFavourites');
     Route::get('/file/download','download')->name('file.download');
 });
 Route::get('/dashboard', function () {

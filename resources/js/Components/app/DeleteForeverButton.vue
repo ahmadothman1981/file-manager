@@ -61,6 +61,7 @@ function onConfirm()
    
     if(props.allSelected){
         form.all = true;
+        form.ids = [];
     }else{
         form.ids = props.selectedIds;
     }
