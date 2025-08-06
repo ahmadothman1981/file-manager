@@ -96,13 +96,13 @@ import DeleteFilesButton from '../Components/app/DeleteFilesButton.vue';
 import DownloadFilesButton from '../Components/app/DownloadFilesButton.vue';
 import StarFilesButton from '../Components/app/StarFilesButton.vue'; 
 import Checkbox from '../Components/Checkbox.vue'
-import {router , Link , useForm} from '@inertiajs/vue3'
+import {router , Link } from '@inertiajs/vue3'
 import {HomeIcon} from '@heroicons/vue/20/solid'
 import FileIcon from '../Components/app/FileIcon.vue'
-import { httpGet } from '../Helper/http-helper'
+import { httpGet, httpPost } from '../Helper/http-helper'
 import { onMounted , onUpdated, ref } from 'vue';
 import { computed } from 'vue';
-import { showErrorDialog, showSuccessNotification } from '@/event-bus';
+import {  showSuccessNotification } from '@/event-bus';
 
 
 //props
@@ -172,15 +172,15 @@ function onDelete(){
 
 function addRemoveFavourite(file)
 {
-  const form = useForm({
-    ids: [file.id],
-});
- form.post(route('file.addToFavourites'),{
-        onSuccess: () => { 
-          
-            showSuccessNotification('Files added to favourites successfully')
-        }
-    })
+ 
+ httpPost(route('file.addToFavourites'),{id:file.id} )
+ .then(()=> {
+  file.is_favourite = !file.is_favourite;
+   showSuccessNotification('Files added to favourites successfully')
+ })
+ .catch(async(er)=> {
+      console.log(er.error.message);
+ })
 }
 onUpdated(() => {
   allFiles.value = {

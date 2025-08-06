@@ -15,6 +15,7 @@ use App\Http\Requests\TrashFileRequest;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\FilesActionRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Requests\AddToFavouritesRequest;
 
 
 class FileController extends Controller
@@ -292,38 +293,25 @@ class FileController extends Controller
        }
        return to_route('trash');
     }
-    public function addToFavourites(FilesActionRequest $request)
+    public function addToFavourites(AddToFavouritesRequest $request)
     {
-          $data = $request->validated();
-        $parent = $request->parent;
-
-        $all = $data['all'] ?? false;
-        $ids = $data['ids'] ?? [];
-        if(!$all && empty($ids))
-        {
-            return [
-                'message' => 'No files selected'
-            ];
-        }
-        if($all)
-        {
-            $children = $parent->children;
-
-        }else{
-            $children = File::find($ids);
-        }
+        $data = $request->validated();
+        $id = $data['id'];
         
-        $data = [];
-        foreach($children as $child)
+        $file = File::find($id);
+        $user_id = Auth::id();
+        $starredFile = StarredFile::query()->where('file_id', $file->id)->where('user_id', $user_id)->first();
+        if($starredFile)
         {
-            $data[] = [
-                'file_id' => $child->id,
-                'user_id' => Auth::id(),
-                'created_at' => Carbon:: now(),
-                'updated_at' => Carbon:: now(),
-            ];
+            $starredFile->delete();
+            return redirect()->back();
+        }else{
+        StarredFile::create([ 
+            'file_id' => $file->id,
+            'user_id' => $user_id,
+            'created_at' => Carbon:: now(),
+            'updated_at' => Carbon:: now(),]);
         }
-        StarredFile::insert($data);
         return redirect()->back();
     }
 }
