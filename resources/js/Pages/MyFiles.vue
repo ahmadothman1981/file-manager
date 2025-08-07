@@ -21,8 +21,9 @@
       </div>
     </li>
   </ol>
-  <div>
-    <StarFilesButton :all-selected="allSelected" :selected-ids="selectedIds" class="mr-5"/>
+  <div class="flex">
+    <label class="flex item-center mr-3">Only Favourite</label>
+   <Checkbox class="ml-2" @change="showOnlyFavourites" v-model:checked="onlyFavourites"/>
     <DownloadFilesButton :all="allSelected" :ids="selectedIds" class="mr-2"/>
     <DeleteFilesButton :delete-all="allSelected" :delete-ids="selectedIds" @deleted="onDelete"/>
   </div>
@@ -113,12 +114,15 @@ const props = defineProps({
 });
 //refs 
 const allSelected = ref(false);
+const onlyFavourites = ref(false);
 const selected = ref({});
 const loadMoreIntersect = ref(null);
 const allFiles = ref({
       data:props.files.data ,
      next: props.files.links.next 
     });
+
+    let params = null;
   //computed 
   const selectedIds = computed(() => Object.entries(selected.value).filter(entry => entry[1]).map(entry => entry[0]))
 //methods 
@@ -182,6 +186,16 @@ function addRemoveFavourite(file)
       console.log(er.error.message);
  })
 }
+function showOnlyFavourites()
+{
+  if(onlyFavourites.value)
+{
+  params.set('favourites', 1 )
+}else{
+  params.delete('favourites' )
+}
+  router.get(window.location.pathname+'?' + params.toString())
+}
 onUpdated(() => {
   allFiles.value = {
     data:props.files.data,
@@ -193,6 +207,9 @@ onMounted(() => {
   //   data:props.files.data,
   //   next:props.files.links.next
   // };
+ params = new URLSearchParams(window.location.search);
+ onlyFavourites.value = params.get('favourites') == '1';
+
   const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && loadMore()), { 
     rootMargin:'-250px 0px 0px'
    })

@@ -31,14 +31,22 @@ class FileController extends Controller
        if(!$folder){
          $folder = $this->getRoot();
        }
-       $files =  File::query()
+       $favourites = (int)$request->get('favourites');
+     
+       $query =  File::query()
+              ->select('files.*')
               ->with('starred')  
               ->where('parent_id', $folder->id)
               ->where('created_by', Auth::id())
               ->orderBy('is_folder', 'desc')
-              ->orderBy('created_at', 'desc')
-              ->orderBy('id','desc')
-              ->paginate(5);
+              ->orderBy('files.created_at', 'desc')
+              ->orderBy('files.id','desc');
+                if($favourites === 1)
+                {
+                    $query->join('starred_files','starred_files.file_id','=','files.id')
+                    ->where('starred_files.user_id', Auth::id());
+                }
+             $files =  $query->paginate(5);
 
               $files = FileResource::collection($files);
               if($request->wantsJson())
@@ -314,4 +322,5 @@ class FileController extends Controller
         }
         return redirect()->back();
     }
+
 }
